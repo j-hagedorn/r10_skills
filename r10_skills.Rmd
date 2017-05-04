@@ -1,0 +1,248 @@
+---
+title: "Data Skills Inventory"
+author: "Region 10 PIHP"
+output:
+  html_document:
+    self_contained: no
+    theme: journal
+    toc: yes
+    toc_depth: 2
+  word_document:
+    toc: yes
+    toc_depth: '2'
+always_allow_html: yes
+---
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+
+library(tidyverse); library(stringr); library(forcats); library(magrittr)
+
+r10_skills <- read_csv("survey/skills_inventory.csv")
+
+skills <-
+  r10_skills %>%
+  select(
+    -CollectorID,-StartDate,-EndDate,-`IP Address`,
+    -`Email Address`,-`First Name`,-`LastName`,-`Custom 1`
+  ) %>%
+  select(
+    id = RespondentID,
+    name = `Name:`,
+    title = `What is your current job title?`,
+    everything()
+  ) %>%
+  group_by(id,name,title) %>%
+  gather(
+    question,
+    response,
+    -id,-name,-title
+  ) %>%
+  separate(
+    question,
+    into = c("activity","item"),
+    sep = " - "
+  ) %>%
+  ungroup() %>%
+  mutate(
+    name = if_else(is.na(name),title,name),
+    item = recode(item,
+                  `Frequency of Use` = "use",
+                  `Level of Interest in Developing Skill` = "interest")
+  ) %>%
+  spread(item,response) %>%
+  mutate(
+    interest_log = recode(interest,`Not Interested` = F,`Somewhat Interested` = F,`Very Interested` = T),
+    interest_num = recode(interest,`Not Interested` = 0,`Somewhat Interested` = 1,`Very Interested` = 2),
+    use_log = recode(use,`Never` = F,`Rarely (1-2x month)` = F,`Occasionally (3-4x month)` = T,
+                     `Frequently (2-3x week)` = T, `Daily` = T),
+    use_num = recode(use,`Never` = 0,`Rarely (1-2x month)` = 1,`Occasionally (3-4x month)` = 2,
+                     `Frequently (2-3x week)` = 3, `Daily` = 4),
+    interest = fct_relevel(interest,c("Not Interested","Somewhat Interested","Very Interested")),
+    use = fct_relevel(use,c("Never","Rarely (1-2x month)","Frequently (2-3x week)",
+                            "Occasionally (3-4x month)","Daily")),
+    engaged = scale(interest_num) / scale(use_num),
+    activity_short = recode(activity,
+                            `Analyze data within multidimensional data sets (e.g. OLAP cubes)` = "Analyze multidimensional data",
+                            `Build and maintain databases or data warehouses` = "Database management",
+                            `Clean messy data for use in analysis (e.g. text data, irregular formats, etc.)` = "Data cleaning",
+                            `Collaborate with others to make a concrete work product` = "Team projects",
+                            `Complete basic math calculations (e.g. arithmetic, percentages, basic algebra)` = "Basic calculations",
+                            `Create advanced visualizations of multidimensional data (e.g. scatterplots, boxplots, heatmaps)` = "Advanced dataviz",
+                            `Create basic reports using Excel, Crystal Reports, etc.` = "Basic reports",
+                            `Create basic visualizations of data (charts, tables, etc.)` = "Basic dataviz",
+                            `Develop predictive models (e.g. regression, classification)` = "Predictive modelling",
+                            `Document workflows in a process map` = "Process mapping",
+                            `Engage in critical thinking (conceptualize, apply, analyze, synthesize, evaluate)` = "Logical reasoning",
+                            `Manage a group of people on a focused project` = "Managing a project team",
+                            `Manage large volumes of data within bandwidth constraints` = "Database administration",
+                            `Negotiate with others to come to a mutually agreeable solution` = "Negotiating solutions",
+                            `Organize and sequence tasks to complete projects in a timely manner` = "Task sequencing",
+                            `Perform statistical analysis of data (e.g. descriptive stats, correlation, etc.)` = "Descriptive statistics",
+                            `Provide basic project management (identifying who does what by when for a specific project)` = "Basic project management",
+                            `Provide comprehensive project management (ensuring deliverables are on time, within budget and of high quality)` = "Comprehensive project management",
+                            `Provide written and verbal summaries of information` = "Presentation",
+                            `Revise work based on feedback from users and collaborators` = "Iteration based on feedback",
+                            `Tell a story to others through use of data and visualizations` = "Data storytelling",
+                            `Turn an idea into a tangible draft for others to review (i.e. prototype)` = "Prototyping",
+                            `Work with colleagues to document and address specific needs` = "Document requirements",
+                            `Write basic queries to extract information from databases` = "Basic queries"
+                            )
+  )
+
+```
+
+# Purpose
+
+This document is a quick summary of the skills inventory survey which was taken by team members prior to onsite interviews.
+
+# Analysis Activities 
+
+## by Current Use
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(plotly)
+
+use <-
+  skills %>%
+  group_by(activity_short,activity,use) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  droplevels() %>%
+  group_by(activity_short) %>%
+  mutate(
+    responders = sum(n),
+    pct = round(n / sum(n) * 100, digits = 1)
+  )
+
+use %>%
+  plot_ly(
+    x = ~activity_short, 
+    y = ~pct, 
+    color = ~use,
+    hoverinfo = 'text',
+    text = ~paste0(n, " out of ", responders," respondents (",pct,"%) ",
+                  "said they currently<br>",
+                  tolower(activity),"<br>",
+                  "at a frequency of ",
+                  tolower(use))
+  ) %>% 
+  add_bars(colors = c("#FE4365","#C8C8A9","#83AF9B")) %>% 
+  layout(
+    margin = list(b = 150),
+    barmode = 'stack',
+    xaxis = list(title = "",tickangle = 45),
+    yaxis = list(title = "% of respondents", range = c(0, 100))
+  )
+
+```
+
+## by Level of Interest
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+library(plotly)
+
+interest <-
+  skills %>%
+  group_by(activity_short,activity,interest) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  droplevels() %>%
+  group_by(activity_short) %>%
+  mutate(
+    responders = sum(n),
+    pct = round(n / sum(n) * 100, digits = 1)
+  )
+
+interest %>%
+  plot_ly(
+    x = ~activity_short, 
+    y = ~pct, 
+    color = ~interest,
+    hoverinfo = 'text',
+    text = ~paste0(n, " out of ", responders," respondents (",pct,"%) ",
+                  "said they were ",tolower(interest), " in learning how to<br>", 
+                  tolower(activity))
+  ) %>% 
+  add_bars(colors = c("#FE4365","#C8C8A9","#83AF9B")) %>% 
+  layout(
+    margin = list(b = 150),
+    barmode = 'stack',
+    xaxis = list(title = "",tickangle = 45),
+    yaxis = list(title = "% of respondents", range = c(0, 100))
+  )
+
+```
+
+
+
+# Interest and Current Use by Activity
+
+The table below provides a quick summary of responses grouped by activity.  You can sort by any of the fields to look at the relationship of different variables.  Here's a quick definition of each of the columns:
+
+* **# doing**: The number of people who report doing an activity at any of the following frequencies: `Occasionally (3-4x month)`,`Frequently (2-3x week)`, or `Daily`.
+* **# interested**: The number of people who reported being `Very interested` in the activity.
+* **Level of Use**: The average score for frequency of use, where the responses are coded as follows: `Never` = 0,`Rarely (1-2x month)` = 1,`Occasionally (3-4x month)` = 2, `Frequently (2-3x week)` = 3, `Daily` = 4.^[We acknowledge that this is an overly simplistic approach, since the difference between the levels is not consistent.  It is provided here to get a rough sense of things.]
+* **Level of Interest**: The average score for frequency of use, where the responses are coded as follows: `Not Interested` = 0,`Somewhat Interested` = 1,`Very Interested` = 2.
+* **Engagement**: The average level of engagement in a given activity.  Engagement here is defined at the individual level as the relationship of `Level of Interest` to `Level of Use`, so that a higher number means that a person is less interested than they are currently using the skill. A lower number, on the other hand, indicates that the person is interested but not currently using the skill.
+
+
+```{r echo = FALSE,message = FALSE, warning = FALSE}
+
+library(DT)
+
+skills %>%
+  group_by(activity_short) %>%
+  summarize(
+    n_using = sum(use_log),
+    n_interest = sum(interest_log),
+    level_use = round(mean(use_num), digits = 1),
+    level_int = round(mean(interest_num), digits = 1),
+    engaged = round(mean(engaged, na.rm = T), digits = 1)
+  ) %>%
+  arrange(desc(n_using)) %>%
+  datatable(
+    rownames = F,
+    colnames = c("# doing","# interested","Level of Use","Level of Interest","Engagement")
+  )
+
+```
+
+
+# Clusters of Interests across Team Members
+
+The heatmap below shows which team members voiced an interest in developing particular skills.  Those who marked *"Very interested"* are shown with dark blue squares.  People who indicated similar, strong interests are grouped close to each other.  As you can see by the chart, the team members at the top of the chart endorsed strong interests across the spectrum of skills and activities listed on the survey, while those at the bottom had fewer interests, sometimes in specific areas.  It is worth noting that this does not necessarily take into account individuals who noted *"Somewhat interested"* in a given category.
+
+```{r echo = FALSE,message = FALSE, warning = FALSE}
+
+library(d3heatmap)
+
+heat_df <-
+skills %>%
+  select(name,activity_short,interest_log) %>%
+  distinct(name,activity_short, .keep_all = TRUE) %>%
+  spread(activity_short,interest_log) 
+
+names <- heat_df$name
+
+heat_df %<>%
+  select(-name) %>%
+  mutate_each(funs( as.numeric(.))) 
+
+row.names(heat_df) <- names
+
+heat_df %>%
+  d3heatmap(colors = "Blues",
+            dendrogram = "both",
+            k_row = 5, 
+            theme = "",
+            yaxis_font_size =  "10pt",
+            show_grid = F)
+
+```
+
+
+
+
+
