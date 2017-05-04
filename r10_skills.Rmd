@@ -52,6 +52,7 @@ skills <-
   spread(item,response) %>%
   mutate(
     interest_log = recode(interest,`Not Interested` = F,`Somewhat Interested` = F,`Very Interested` = T),
+    interest_any = recode(interest,`Not Interested` = F,`Somewhat Interested` = T,`Very Interested` = T),
     interest_num = recode(interest,`Not Interested` = 0,`Somewhat Interested` = 1,`Very Interested` = 2),
     use_log = recode(use,`Never` = F,`Rarely (1-2x month)` = F,`Occasionally (3-4x month)` = T,
                      `Frequently (2-3x week)` = T, `Daily` = T),
@@ -177,7 +178,41 @@ interest %>%
 
 
 
-# Interest and Current Use by Activity
+# Interest vs. Current Use by Activity
+
+The chart below shows the number of people who identified currently using a given skill, compared to the number of people who endorsed being *somewhat* or *very* interested.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+skills %>%
+  group_by(activity_short, activity) %>%
+  summarize(
+    Using = sum(use_log) * -1, # to make pop pyramid
+    Interested = sum(interest_any)
+  ) %>%
+  gather(
+    type,n,Using:Interested
+  ) %>%
+  mutate(
+    abs_n = abs(n)
+  ) %>%
+  plot_ly(x= ~n, y= ~activity_short, color= ~type) %>% 
+  add_bars(
+    orientation = 'h', 
+    hoverinfo = 'text', 
+    text = ~paste0(abs_n, " people")
+  )%>%
+  layout(
+    bargap = 0.1, barmode = 'overlay',
+    margin = list(l = 200),
+    xaxis = list(tickmode = 'array', tickvals = c(-20, -10, 0, 10, 20),
+                 ticktext = c('20', '10', '0', '10', '20')),
+    yaxis = list(title = "")
+  )
+
+
+```
+
 
 The table below provides a quick summary of responses grouped by activity.  You can sort by any of the fields to look at the relationship of different variables.  Here's a quick definition of each of the columns:
 
