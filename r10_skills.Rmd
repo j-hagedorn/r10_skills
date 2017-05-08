@@ -229,6 +229,7 @@ skills %>%
 
 ```
 
+Please note that in the chart above, individuals may be duplicated in the *Interested* and *Using* groups, since some people are already using a skill but are interested in developing it further.  If we look at areas where there is very little use, a large amount of interest, and where the activity is important for the needs of the project, we can determine broad areas to build a training plan.
 
 The table below provides a quick summary of responses grouped by activity.  You can sort by any of the fields to look at the relationship of different variables.  Here's a quick definition of each of the columns:
 
