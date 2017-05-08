@@ -100,6 +100,8 @@ This document is a quick summary of the skills inventory survey which was taken 
 
 ## by Current Use
 
+The stacked bar chart below shows the frequency of use by percentage of respondents for each skill. By hovering over the colored bar, you can see the number of respondents that reported that particular frequency and the full description of the skill. You can also click on a frequency descriptions (*daily, occasionally, etc.*) in the legend to remove items endorsed at that frequency from the chart. To include this data, simply click the frequency label again. 
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(plotly)
@@ -138,7 +140,15 @@ use %>%
 
 ```
 
+*Group Summary:*
+
+The skills used least frequently by Region 10 staff include: advanced data visualization, analysis of multidimensional data, database administration, database management, and predictive modeling.
+
+Region 10 staff reported using the following skills most often: document requirements, task sequencing, team projects (collaborate with others), presentations (provide written and verbal summaries of information), and negotiation. 
+
 ## by Level of Interest
+
+The stacked bar chart below shows the level of interest in developing each skill by percentage of respondents for each skills. By hovering over the colored bar, you can see the number of respondents that reported that particular frequency and the full description of the skill. You can also click on a level of interest descriptions (*Not interested, Somewhat interested, etc.*) in the legend to remove items endorsed at that frequency from the chart. To include this data, simply click the frequency label again. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -176,11 +186,17 @@ interest %>%
 
 ```
 
+*Group Summary: *
 
+Region 10 staff expressed the greatest level of interest in developing the following skills: logical reasoning, descriptive statistics, team projects (collaborate with others), task sequencing, and project management. 
+
+Those topics in which staff expressed the least interest include: analyze multidimensional data, predictive modeling, writing basic queries, database administration, managing a project team, predictive modeling, and prototyping (turning an idea into a tangible draft for others to review). 
 
 # Interest vs. Current Use by Activity
 
 The chart below shows the number of people who identified currently using a given skill, compared to the number of people who endorsed being *somewhat* or *very* interested.
+
+**Comparison of Activities in Current Use to Those with Interest**
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -218,10 +234,11 @@ The table below provides a quick summary of responses grouped by activity.  You 
 
 * **# doing**: The number of people who report doing an activity at any of the following frequencies: `Occasionally (3-4x month)`,`Frequently (2-3x week)`, or `Daily`.
 * **# interested**: The number of people who reported being `Very interested` in the activity.
-* **Level of Use**: The average score for frequency of use, where the responses are coded as follows: `Never` = 0,`Rarely (1-2x month)` = 1,`Occasionally (3-4x month)` = 2, `Frequently (2-3x week)` = 3, `Daily` = 4.^[We acknowledge that this is an overly simplistic approach, since the difference between the levels is not consistent.  It is provided here to get a rough sense of things.]
+* **Level of Use**: The average score for frequency of use, where the responses are coded as follows: `Never` = 0, `Rarely (1-2x month)` = 1, `Occasionally (3-4x month)` = 2, `Frequently (2-3x week)` = 3, `Daily` = 4.^[We acknowledge that this is an overly simplistic approach, since the difference between the levels is not consistent.  It is provided here to get a rough sense of things.]
 * **Level of Interest**: The average score for frequency of use, where the responses are coded as follows: `Not Interested` = 0,`Somewhat Interested` = 1,`Very Interested` = 2.
 * **Engagement**: The average level of engagement in a given activity.  Engagement here is defined at the individual level as the relationship of `Level of Interest` to `Level of Use`, so that a higher number means that a person is less interested than they are currently using the skill. A lower number, on the other hand, indicates that the person is interested but not currently using the skill.
 
+**Summary Table of Responses by Activity:**
 
 ```{r echo = FALSE,message = FALSE, warning = FALSE}
 
@@ -244,10 +261,17 @@ skills %>%
 
 ```
 
+Region 10 may want to consider providing training/education in addition to the “learning by doing approach” that will be offered to data analysis project team members for those skills that could be broadly applied throughout the organization, are currently used infrequently, and there is high interest such a process mapping, prototyping, basic queries, and basic data visualizations.   
+
+More specialized skills for which there is currently low utilization but high interest (such as advanced data visualization, predictive modeling, analyze multidimensional data, and database management) could be considered if development of these skills in house (rather than using contracted providers) supports the strategic direction of the organization
 
 # Clusters of Interests across Team Members
 
-The heatmap below shows which team members voiced an interest in developing particular skills.  Those who marked *"Very interested"* are shown with dark blue squares.  People who indicated similar, strong interests are grouped close to each other.  As you can see by the chart, the team members at the top of the chart endorsed strong interests across the spectrum of skills and activities listed on the survey, while those at the bottom had fewer interests, sometimes in specific areas.  It is worth noting that this does not necessarily take into account individuals who noted *"Somewhat interested"* in a given category.
+The heatmap below shows which team members voiced an interest in developing particular skills.  Those who marked *"Very interested"* are shown with dark blue squares.  People who indicated similar, strong interests are grouped close to each other.  The [brackets on the sides](https://en.wikipedia.org/wiki/Dendrogram) group individuals who are interested in learning the same skills.
+
+As you can see by the chart, the team members at the top of the chart endorsed strong interests across the spectrum of skills and activities listed on the survey, while those at the bottom had fewer interests, sometimes in specific areas.  It is worth noting that this does not necessarily take into account individuals who noted *"Somewhat interested"* in a given category.
+
+**Heatmap of Interests by Team Member:**
 
 ```{r echo = FALSE,message = FALSE, warning = FALSE}
 
